@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet"  href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <title>Simple chat</title>
+    </head>
+    <body>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var ws = new WebSocket("ws://" + location.host + "/ws");
+                var msg = document.getElementById('msg');
+                var submit = document.getElementById('submit');
+                var clean = document.getElementById('clean');
+                var message = document.getElementById('message');
+
+                submit.addEventListener('click', function(event) {
+                    var data = {msg: msg.value, command: ""};
+                    ws.send(JSON.stringify(data));
+                    msg.value = '';
+                });
+
+                clean.addEventListener('click', function(event) {
+                    var data = {msg: "", command: "clean"};
+                    ws.send(JSON.stringify(data));
+                });
+
+                ws.onmessage = function(event) {
+                    if (event.data.length == 0) {
+                        message.innerHTML = "";
+                        return;
+                    }
+
+                    var data = JSON.parse(event.data);
+                    message.innerHTML = "";
+                    for (var v in data) {
+                        var msg = data[v]["msg"];
+                        var display_id = data[v]["display_id"];
+                        var post_time = data[v]["post_time"];
+                        message.innerHTML += "<div>" + v + " : " + post_time + "</div>";
+                        message.innerHTML += "<div> ID: "  + display_id + "</div>";
+                        message.innerHTML += '<div class="well well-sm">' + msg + '</div>';
+                    }
+                };
+
+            });
+        </script>
+        <div class="container">
+            <div class="page-header">
+                <h1>Simple Chat</h1>
+            </div>
+            <div id="message"></div>
+            <hr/>
+            <div class="form-group">
+                <label for="comment">comment</label>
+                <textarea class="form-control" rows="5" id="msg"></textarea>
+                <button type="button" id="submit" class="btn btn-primary">submit</button>
+                <button type="button" id="clean" class="btn btn-primary">clean</button>
+            </div>
+        </div>
+    </body>
+</html>
